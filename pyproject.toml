@@ -1,0 +1,69 @@
+[project]
+name = "email-typo-fixer"
+version = "0.1.0"
+description = "A Python library to automatically detect and fix common typos in email addresses"
+authors = [
+    { name = "Joao Brito" }
+]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.8.1,<4.0"
+keywords = ["email", "typo", "correction", "validation", "normalization"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Communications :: Email",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing",
+]
+dependencies =[
+"rapidfuzz>=3.0.0,<4.0.0",
+"publicsuffixlist>=0.9.0,<2.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/machado000/email-typo-fixer"
+Issues = "https://github.com/machado000/email-typo-fixer/issues"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.poetry]
+packages = [{ include = "email_typo_fixer"}]
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=7.0.0,<8.0.0"
+pytest-cov = ">=4.0.0,<5.0.0"
+flake8 = ">=5.0.0,<6.0.0"
+mypy = ">=1.0.0,<2.0.0"
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "--cov=email_typo_fixer --cov-report=html --cov-report=term-missing"
