@@ -1,85 +1,170 @@
+
+import logging
+import os
 import rapidfuzz
 import re
-import logging
 
 from functools import lru_cache
 from publicsuffixlist import PublicSuffixList
 
 
 class EmailTypoFixer:
-    def __init__(self, max_distance=2, typo_domains=None, logger=None):
+    """
+    A class to normalize and fix common typos in email addresses.
+    TLD (Top-Level Domain) suffixes are validated against a Public Suffix List,
+    and common domain typos are corrected using a `domain_typos` dictionary.
+
+    This includes:
+    - Lowercasing
+    - Removing invalid characters
+    - Ensuring a single '@' and at least one '.' after '@'
+    - Fixing TLD (Top-Level Domain) typos
+    - Fixing common domain name typos
+
+    Attributes:
+        max_distance: Maximum allowed distance for typo correction.
+        psl: Instance of PublicSuffixList or None.
+        valid_suffixes: Set of valid public suffixes or None.
+        domain_typos: Mapping of common domain names (not suffixes) typos to corrections.
+        logger: Logger instance.
+    """
+
+    def __init__(self, max_distance: int = 2, domain_typos: dict[str, str] | None = None,
+                 logger: logging.Logger | None = None) -> None:
+        """
+        Initialize the EmailTypoFixer.
+
+        Args:
+            max_distance: Maximum allowed distance for typo correction.
+            typo_domains: Optional dictionary of domain typo corrections.
+            logger: Optional logger instance.
+        """
         self.logger = logger or logging.getLogger(__name__)
         self.logger.addHandler(logging.NullHandler())
         self.max_distance = max_distance
         self.psl = None
         self.valid_suffixes = None
-        self.domain_typos = typo_domains or {
+        self.domain_typos = domain_typos or {
             'gamil': 'gmail',
             'gmial': 'gmail',
             'gnail': 'gmail',
             'gmaill': 'gmail',
-            'yaho': 'yahoo',
-            'yahho': 'yahoo',
-            'outlok': 'outlook',
-            'outllok': 'outlook',
-            'outlokk': 'outlook',
             'hotmal': 'hotmail',
             'hotmial': 'hotmail',
             'homtail': 'hotmail',
             'hotmaill': 'hotmail',
+            'outlok': 'outlook',
+            'outllok': 'outlook',
+            'outlokk': 'outlook',
+            'oul': 'uol',
+            'uoll': 'uol',
+            'uoo': 'uol',
+            'yaho': 'yahoo',
+            'yahho': 'yahoo',
         }
         self._init_psl_and_suffixes()
 
-    def _init_psl_and_suffixes(self):
+    def _init_psl_and_suffixes(self) -> None:
+        """
+        Initialize the PublicSuffixList and fetch valid suffixes by parsing the .dat file.
+        """
         if self.psl is None:
             try:
                 self.psl = PublicSuffixList()
             except Exception as e:
                 self.logger.error(f"Failed to initialize PublicSuffixList: {e}")
                 raise ValueError("Could not initialize public suffix list")
-        if self.valid_suffixes is None:
-            # Use a predefined list of common valid suffixes since _suffixlist is not available
-            self.valid_suffixes = {
-                'com', 'org', 'net', 'edu', 'gov', 'mil', 'int', 'co', 'info', 'biz',
-                'name', 'museum', 'us', 'uk', 'ca', 'de', 'jp', 'fr', 'au', 'in',
-                'br', 'cn', 'ru', 'it', 'es', 'mx', 'nl', 'se', 'no', 'dk',
-                'io', 'ai', 'me', 'ly', 'cc', 'tv', 'fm', 'to', 'co.uk', 'org.uk',
-                'ac.uk', 'com.au', 'org.au', 'edu.au', 'gov.au', 'com.br', 'org.br',
-                'edu.br', 'gov.br', 'co.jp', 'or.jp', 'ne.jp', 'go.jp', 'co.in',
-                'org.in', 'edu.in', 'gov.in', 'com.cn', 'org.cn', 'edu.cn', 'gov.cn'
-            }
+
+        # Find the .dat file in the installed package
+        try:
+            import publicsuffixlist
+            dat_path = os.path.join(os.path.dirname(publicsuffixlist.__file__), "public_suffix_list.dat")
+            suffixes = set()
+            with open(dat_path, encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("//"):
+                        continue
+                    # Remove wildcards and exceptions
+                    if line.startswith("!"):
+                        line = line[1:]
+                    if line.startswith("*."):
+                        line = line[2:]
+                    suffixes.add(line)
+            self.valid_suffixes = suffixes
+        except Exception as e:
+            self.logger.error(f"Failed to parse public_suffix_list.dat: {e}")
+            raise ValueError("Could not parse public suffix list file")
 
     @lru_cache(maxsize=4096)
-    def _fix_extension_typo_cached(self, domain, max_distance):
+    def _fix_extension_typo_cached(self, domain: str, max_distance: int) -> str:
+        """
+        Fix typos in the domain extension using Levenshtein distance against PublicSuffixList.
+
+        Args:
+            domain: The domain part of the email.
+            max_distance: Maximum allowed distance for typo correction.
+
+        Returns:
+            The domain with corrected extension if a close match is found.
+        """
+        assert self.valid_suffixes is not None, "valid_suffixes must be initialized"
+
         for i in range(1, min(4, len(domain.split('.')))):
             parts = domain.rsplit('.', i)
+
             if len(parts) < 2:
                 continue
             ext_candidate = '.'.join(parts[-i:])
             best_match = None
             best_distance = max_distance + 1
+
             for suffix in self.valid_suffixes:
                 dist = rapidfuzz.distance.Levenshtein.distance(ext_candidate, suffix)
                 if dist < best_distance:
                     best_distance = dist
                     best_match = suffix
+
             if best_match and best_distance <= max_distance:
                 domain_fixed = '.'.join(parts[:-i] + [best_match])
                 self.logger.info(f"Fixed extension typo: '{ext_candidate}' -> '{best_match}' in domain '{domain}'")
+
                 return domain_fixed
+
         return domain
 
-    def fix_extension_typo(self, domain):
+    def fix_extension_typo(self, domain: str) -> str:
+        """
+        Public method to fix typos in the domain extension or TLD (Top-Level Domain).
+        Fix typos in the domain extension using Levenshtein distance against PublicSuffixList.
+
+        Args:
+            domain: The domain name part of the email.
+
+        Returns:
+            The domain with corrected extension if a close match is found.
+        """
         return self._fix_extension_typo_cached(domain, self.max_distance)
 
     def normalize(self, email: str) -> str:
         """
         Normalize and fix common issues in an email address string.
-        - Lowercase
-        - Remove invalid characters
-        - Ensure a single '@' and at least one '.' after @
-        - Use module `PublicSuffixList` and  `Levenshtein` to fix extension typos
-        - Raise ValueError if cannot be fixed
+
+        This includes:
+            - Lowercasing
+            - Removing invalid characters
+            - Ensuring a single '@' and at least one '.' after '@'
+            - Fixing extension typos using PublicSuffixList and Levenshtein distance
+            - Fixing common domain typos using default domain_typos dictitonary
+
+        Args:
+            email: The email address to normalize.
+
+        Returns:
+            The normalized and corrected email address.
+
+        Raises:
+            ValueError: If the email cannot be normalized or is invalid.
         """
         if not isinstance(email, str):
             msg = f"Email must be a string: {email}"
@@ -122,7 +207,9 @@ class EmailTypoFixer:
 
         # Use publicsuffixlist to split domain into domain_name and extension (public suffix)
         public_suffix = ''
+
         # Call publicsuffixlist with error handling
+        assert self.psl is not None, "psl must be initialized"
         try:
             public_suffix = self.psl.publicsuffix(domain)
         except Exception as e:
@@ -170,12 +257,17 @@ _default_normalizer = EmailTypoFixer()
 def normalize_email(email: str) -> str:
     """
     Normalize and fix common issues in an email address string.
-    - Lowercase
-    - Remove invalid characters
-    - Ensure single '@' and at least one '.' after '@'
-    - Use rapidfuzz and publicsuffixlist to fix common extension typos
-    - Fix commom domain typos
-    - Raise ValueError if cannot be fixed
+
+    This is a convenience function that uses a default EmailTypoFixer instance.
+
+    Args:
+        email: The email address to normalize.
+
+    Returns:
+        The normalized and corrected email address.
+
+    Raises:
+        ValueError: If the email cannot be normalized or is invalid.
     """
     return _default_normalizer.normalize(email)
 
