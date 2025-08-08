@@ -132,8 +132,8 @@ class EmailTypoFixer:
 
             if best_match and best_distance <= max_distance:
                 domain_fixed = '.'.join(parts[:-i] + [best_match])
-                self.logger.info(f"Fixed extension typo: '{ext_candidate}' -> '{best_match}' in domain '{domain}'")
-
+                if ext_candidate != best_match:
+                    self.logger.info(f"Fixed extension typo: '{ext_candidate}' -> '{best_match}' in domain '{domain}'")
                 return domain_fixed
 
         return domain
