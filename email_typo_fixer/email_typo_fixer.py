@@ -1,11 +1,13 @@
 
-import logging
+
 import os
 import rapidfuzz
 import re
+import logging
 
 from functools import lru_cache
 from publicsuffixlist import PublicSuffixList
+from . import logger as package_logger
 
 
 class EmailTypoFixer:
@@ -39,7 +41,7 @@ class EmailTypoFixer:
             typo_domains: Optional dictionary of domain typo corrections.
             logger: Optional logger instance.
         """
-        self.logger = logger or logging.getLogger(__name__)
+        self.logger = logger or package_logger
         self.logger.addHandler(logging.NullHandler())
         self.max_distance = max_distance
         self.psl = None
