@@ -1,8 +1,9 @@
 # Email Typo Fixer
 
-[![PyPI version](https://badge.fury.io/py/email-typo-fixer.svg)](https://badge.fury.io/py/email-typo-fixer)
 [![Python Support](https://img.shields.io/pypi/pyversions/email-typo-fixer.svg)](https://pypi.org/project/email-typo-fixer/)
+[![PyPI version](https://img.shields.io/pypi/v/email-typo-fixer)](https://pypi.org/project/email-typo-fixer/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Issues](https://img.shields.io/github/issues/machado000/email-typo-fixer)](https://github.com/machado000/email-typo-fixer/issues)
 
 A Python library to automatically detect and fix common typos in email addresses using intelligent algorithms and domain knowledge.
 
@@ -14,6 +15,7 @@ A Python library to automatically detect and fix common typos in email addresses
 - **Domain Correction**: Fixes common domain typos (e.g., `gamil.com` → `gmail.com`)
 - **Configurable**: Custom typo dictionary and distance thresholds
 - **Logging Support**: Built-in logging for debugging and monitoring
+
 
 ## Installation
 
@@ -31,10 +33,38 @@ corrected_email = normalize_email("user@gamil.com")
 print(corrected_email)  # user@gmail.com
 
 # Class interface for more control
-fixer = EmailTypoFixer(max_distance=2)
+fixer = EmailTypoFixer(max_distance=1)
 corrected_email = fixer.normalize("user@yaho.com")
 print(corrected_email)  # user@yahoo.com
 ```
+
+
+## Limitations
+
+### TLD '.co' False Positives
+
+By default, the library may correct emails ending in `.co` (such as `user@example.co`) to `.com` if the Levenshtein distance is within the allowed threshold. This can lead to false positives, especially for valid `.co` domains (e.g., Colombian domains or legitimate `.co` TLDs).
+
+**How to control this behavior:**
+
+- The `normalize` method and the `normalize_email` function accept an optional parameter `fix_tld_co: bool` (default: `True`).
+- If you want to prevent `.co` domains from being auto-corrected to `.com`, call:
+
+```python
+from email_typo_fixer import normalize_email
+
+normalize_email("user@example.co", fix_tld_co=False)  # Will NOT change .co to .com
+```
+
+Or, with the class:
+
+```python
+fixer = EmailTypoFixer()
+fixer.normalize("user@example.co", fix_tld_co=False)
+```
+
+This gives you control to avoid unwanted corrections for `.co` domains.
+
 
 ## Usage Examples
 
@@ -76,7 +106,7 @@ custom_typos = {
 
 # Initialize with custom settings
 fixer = EmailTypoFixer(
-    max_distance=3,           # Allow more distant corrections
+    max_distance=2,           # Allow more distant corrections
     typo_domains=custom_typos, # Use custom typo dictionary
     logger=logger             # Use custom logger
 )
@@ -125,10 +155,10 @@ Simple function interface for email normalization.
 
 Main class for email typo correction with customizable options.
 
-#### `__init__(max_distance=2, typo_domains=None, logger=None)`
+#### `__init__(max_distance=1, typo_domains=None, logger=None)`
 
 **Parameters:**
-- `max_distance` (int): Maximum Levenshtein distance for extension corrections (default: 2)
+- `max_distance` (int): Maximum Levenshtein distance for extension corrections (default: 1)
 - `typo_domains` (dict): Custom dictionary of domain typos to corrections
 - `logger` (logging.Logger): Custom logger instance
 
@@ -245,14 +275,6 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Changelog
-
-### [0.1.0] - 2025-08-07
-- Initial release
-- Basic email typo correction functionality
-- Support for domain and extension corrections
-- Configurable typo dictionary
-- Comprehensive test suite
 
 ## Acknowledgments
 

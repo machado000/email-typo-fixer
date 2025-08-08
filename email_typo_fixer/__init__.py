@@ -1,12 +1,9 @@
 
+
 import logging
 
 from .email_typo_fixer import EmailTypoFixer, normalize_email
 from typing import Optional
-
-# Package logger
-logger = logging.getLogger(__name__)
-logger.propagate = True
 
 
 def setup_logging(level: int = logging.INFO, format_string: Optional[str] = None) -> None:
@@ -23,11 +20,12 @@ def setup_logging(level: int = logging.INFO, format_string: Optional[str] = None
     """
     if format_string is None:
         format_string = '%(levelname)s - %(message)s'
+
     logging.basicConfig(
         level=level,
         format=format_string,
-        handlers=[logging.StreamHandler()],
+        handlers=[logging.StreamHandler()]
     )
 
 
-__all__ = ["EmailTypoFixer", "normalize_email", "setup_logging", "logger"]
+__all__ = ["EmailTypoFixer", "normalize_email", "setup_logging"]

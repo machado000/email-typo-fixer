@@ -1,13 +1,11 @@
-
-
 import os
-import rapidfuzz
 import re
 import logging
 
 from functools import lru_cache
 from publicsuffixlist import PublicSuffixList
-from . import logger as package_logger
+from rapidfuzz.distance import DamerauLevenshtein
+from typing import Optional
 
 
 class EmailTypoFixer:
@@ -31,7 +29,7 @@ class EmailTypoFixer:
         logger: Logger instance.
     """
 
-    def __init__(self, max_distance: int = 2, domain_typos: dict[str, str] | None = None,
+    def __init__(self, max_distance: int = 1, domain_typos: dict[str, str] | None = None,
                  logger: logging.Logger | None = None) -> None:
         """
         Initialize the EmailTypoFixer.
@@ -41,8 +39,11 @@ class EmailTypoFixer:
             typo_domains: Optional dictionary of domain typo corrections.
             logger: Optional logger instance.
         """
-        self.logger = logger or package_logger
-        self.logger.addHandler(logging.NullHandler())
+        if logger is not None:
+            self.logger = logger
+        else:
+            self.logger = logging.getLogger(f"{__name__}.EmailTypoFixer")
+            self.logger.addHandler(logging.NullHandler())
         self.max_distance = max_distance
         self.psl = None
         self.valid_suffixes = None
@@ -64,7 +65,6 @@ class EmailTypoFixer:
             'yaho': 'yahoo',
             'yahho': 'yahoo',
         }
-        self._init_psl_and_suffixes()
 
     def _init_psl_and_suffixes(self) -> None:
         """
@@ -100,6 +100,9 @@ class EmailTypoFixer:
 
     @lru_cache(maxsize=4096)
     def _fix_extension_typo_cached(self, domain: str, max_distance: int) -> str:
+        # Ensure suffixes are initialized
+        if self.valid_suffixes is None:
+            self._init_psl_and_suffixes()
         """
         Fix typos in the domain extension using Levenshtein distance against PublicSuffixList.
 
@@ -122,7 +125,7 @@ class EmailTypoFixer:
             best_distance = max_distance + 1
 
             for suffix in self.valid_suffixes:
-                dist = rapidfuzz.distance.Levenshtein.distance(ext_candidate, suffix)
+                dist = DamerauLevenshtein.distance(ext_candidate, suffix)
                 if dist < best_distance:
                     best_distance = dist
                     best_match = suffix
@@ -148,7 +151,7 @@ class EmailTypoFixer:
         """
         return self._fix_extension_typo_cached(domain, self.max_distance)
 
-    def normalize(self, email: str) -> str:
+    def normalize(self, email: str, fix_tld_co: Optional[bool] = True) -> str:
         """
         Normalize and fix common issues in an email address string.
 
@@ -204,8 +207,12 @@ class EmailTypoFixer:
             self.logger.warning(msg)
             raise ValueError(msg)
 
-        # Fix extension typos using Damerau-Levenshtein distance against all valid public suffixes
-        domain = self.fix_extension_typo(domain)
+        # Optionally skip TLD correction for .co domains if requested
+        if domain.endswith('.co') and not fix_tld_co:
+            pass
+        else:
+            # Fix extension typos using Damerau-Levenshtein distance against all valid public suffixes
+            domain = self.fix_extension_typo(domain)
 
         # Use publicsuffixlist to split domain into domain_name and extension (public suffix)
         public_suffix = ''
@@ -256,7 +263,7 @@ class EmailTypoFixer:
 _default_normalizer = EmailTypoFixer()
 
 
-def normalize_email(email: str) -> str:
+def normalize_email(email: str, fix_tld_co: Optional[bool] = True) -> str:
     """
     Normalize and fix common issues in an email address string.
 
@@ -271,7 +278,7 @@ def normalize_email(email: str) -> str:
     Raises:
         ValueError: If the email cannot be normalized or is invalid.
     """
-    return _default_normalizer.normalize(email)
+    return _default_normalizer.normalize(email, fix_tld_co)
 
 
 # Public API

@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [1.0.2] - 2025-08-08
+
+### Added
+- Optional parameter `fix_tld_co` to method `normalize_email` to control whether `.co` TLDs are auto-corrected to `.com`.
+- Improved documentation and README to warn about possible false positives for `.co` domains and how to use `fix_tld_co`.
+
+### Changed
+- Switched typo correction algorithm from Levenshtein to Damerau-Levenshtein for improved accuracy on TLD corrections.
+- Changed default `max_distance` for TLD typo correction from 2 to 1 (stricter by default).
+
+
 ## [1.0.1] - 2025-08-07
 
 ### Changed
