@@ -1,6 +1,6 @@
 [project]
 name = "email-typo-fixer"
-version = "1.0.2"
+version = "1.0.3"
 description = "A Python library to automatically detect and fix common typos in email addresses"
 authors = [
     { name = "Joao Brito" }
@@ -22,6 +22,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Text Processing",
 ]
+
 dependencies =[
 "rapidfuzz>=3.13.0,<4.0.0",
 "publicsuffixlist (>=1.0.2.20250802,<2.0.0.0)",
@@ -32,8 +33,8 @@ Homepage = "https://github.com/machado000/email-typo-fixer"
 Issues = "https://github.com/machado000/email-typo-fixer/issues"
 
 [build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 packages = [{ include = "email_typo_fixer"}]
