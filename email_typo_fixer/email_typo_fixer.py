@@ -171,10 +171,18 @@ class EmailTypoFixer:
         Raises:
             ValueError: If the email cannot be normalized or is invalid.
         """
+
         if not isinstance(email, str):
             msg = f"Email must be a string: {email}"
             self.logger.error(msg)
             raise ValueError(msg)
+
+        # If the string contains known separators (e.g., ' e ', ' / '), split and take the first part
+        # This is before any normalization, to avoid breaking the separator
+        for sep in [";", ",", "/", " e ", " and "]:
+            if sep in email:
+                email = email.split(sep, 1)[0]
+                break
 
         # Lowercase and strip
         email = email.strip().lower()
