@@ -1,22 +1,20 @@
 [project]
 name = "email-typo-fixer"
-version = "0.1.0"
+version = "1.0.1"
 description = "A Python library to automatically detect and fix common typos in email addresses"
 authors = [
     { name = "Joao Brito" }
 ]
 license = { text = "MIT" }
 readme = "README.md"
-requires-python = ">=3.8.1,<4.0"
+requires-python = ">=3.10,<4.0"
 keywords = ["email", "typo", "correction", "validation", "normalization"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -25,8 +23,8 @@ classifiers = [
     "Topic :: Text Processing",
 ]
 dependencies =[
-"rapidfuzz>=3.0.0,<4.0.0",
-"publicsuffixlist>=0.9.0,<2.0.0",
+"rapidfuzz>=3.13.0,<4.0.0",
+"publicsuffixlist (>=1.0.2.20250802,<2.0.0.0)",
 ]
 
 [project.urls]
@@ -47,7 +45,7 @@ flake8 = ">=5.0.0,<6.0.0"
 mypy = ">=1.0.0,<2.0.0"
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -66,4 +64,4 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "--cov=email_typo_fixer --cov-report=html --cov-report=term-missing"
+addopts = "--cov=email_typo_fixer --cov-report=term-missing"

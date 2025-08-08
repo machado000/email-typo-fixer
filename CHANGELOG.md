@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2025-08-07
+
+### Changed
+- Major: Now parses the official `public_suffix_list.dat` file at runtime for suffix validation (no hardcoded or private attributes)
+- Python 3.10+ required
+- Production-ready: API and behavior are stable
+
+### Added
+- More robust and future-proof suffix handling
+- Improved README and documentation
+- Example for custom typo dictionary and logging
+
+### Fixed
+- Lint and test discovery issues
+
+
 ## [Unreleased]
 
 ## [0.1.0] - 2025-08-07

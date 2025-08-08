@@ -8,11 +8,11 @@ A Python library to automatically detect and fix common typos in email addresses
 
 ## Features
 
-- **Smart Typo Detection**: Uses Levenshtein distance algorithm to detect and correct email typos
+- **Email Normalization**: Lowercases, strips, and removes invalid characters
+- **Extension Validation**: Validates and corrects TLDs using the official [PublicSuffixList](https://pypi.org/project/publicsuffixlist/) (parses `.dat` file directly)
+- **Smart Typo Detection**: Uses Levenshtein distance to detect and correct TLD and domain name typos
 - **Domain Correction**: Fixes common domain typos (e.g., `gamil.com` → `gmail.com`)
-- **Extension Validation**: Validates and corrects top-level domains using the Public Suffix List
-- **Email Normalization**: Normalizes email addresses by removing invalid characters and formatting
-- **Configurable**: Customizable typo dictionary and distance thresholds
+- **Configurable**: Custom typo dictionary and distance thresholds
 - **Logging Support**: Built-in logging for debugging and monitoring
 
 ## Installation
@@ -49,10 +49,14 @@ normalize_email("jane@yaho.com")         # → jane@yahoo.com
 normalize_email("user@outlok.com")       # → user@outlook.com
 normalize_email("test@hotmal.com")       # → test@hotmail.com
 
-# Fix extension typos
+# Fix extension typos (using up-to-date public suffix list)
 normalize_email("user@example.co")       # → user@example.com
 normalize_email("user@site.rog")         # → user@site.org
 ```
+
+### Robust Suffix Handling
+
+This library parses the official `public_suffix_list.dat` file at runtime, ensuring all TLDs and public suffixes are always up to date. No hardcoded suffixes are used.
 
 ### Advanced Usage with Custom Configuration
 
@@ -181,9 +185,9 @@ except ValueError as e:
 
 ## Requirements
 
-- Python 3.8+
-- Levenshtein >= 0.25.0
-- publicsuffixlist >= 0.10.0
+- Python 3.10+
+- RapidFuzz  >= 3.13.0
+- publicsuffixlist >= 1.0.2
 
 ## Development
 
@@ -220,9 +224,6 @@ poetry run pytest tests/test_email_typo_fixer.py
 ### Code Quality
 
 ```bash
-# Format code with Black
-poetry run black email_typo_fixer tests
-
 # Lint with flake8
 poetry run flake8 email_typo_fixer tests
 
@@ -255,6 +256,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
-- Uses the [python-Levenshtein](https://github.com/maxbachmann/Levenshtein) library for string distance calculations
-- Uses [publicsuffixlist](https://github.com/ko-zu/psl) for domain validation
+- Uses the [Levenshtein](https://github.com/maxbachmann/Levenshtein) and [RapidFuzz](https://github.com/rapidfuzz/RapidFuzz) libraries for string distance calculations
+- Uses [publicsuffixlist](https://github.com/ko-zu/psl) for TLD (Top Level Domain) validation
 - Inspired by various email validation libraries in the Python ecosystem
