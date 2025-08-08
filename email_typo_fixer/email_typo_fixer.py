@@ -30,13 +30,14 @@ class EmailTypoFixer:
     """
 
     def __init__(self, max_distance: int = 1, domain_typos: dict[str, str] | None = None,
-                 logger: logging.Logger | None = None) -> None:
+                 common_tlds: list[str] | None = None, logger: logging.Logger | None = None) -> None:
         """
         Initialize the EmailTypoFixer.
 
         Args:
             max_distance: Maximum allowed distance for typo correction.
             typo_domains: Optional dictionary of domain typo corrections.
+            common_tlds: Optional list of common TLDs to prefer in case of tie.
             logger: Optional logger instance.
         """
         if logger is not None:
@@ -65,6 +66,11 @@ class EmailTypoFixer:
             'yaho': 'yahoo',
             'yahho': 'yahoo',
         }
+
+        self.common_tlds = common_tlds or [
+            "com", "net", "org", "edu", "gov", "mil", "br",
+            "com.br", "net.br", "org.br", "edu.br", "gov.br", "mil.br"
+        ]
 
     def _init_psl_and_suffixes(self) -> None:
         """
@@ -121,16 +127,25 @@ class EmailTypoFixer:
             if len(parts) < 2:
                 continue
             ext_candidate = '.'.join(parts[-i:])
-            best_match = None
+            best_matches = []
             best_distance = max_distance + 1
 
             for suffix in self.valid_suffixes:
                 dist = DamerauLevenshtein.distance(ext_candidate, suffix)
                 if dist < best_distance:
                     best_distance = dist
-                    best_match = suffix
+                    best_matches = [suffix]
+                elif dist == best_distance:
+                    best_matches.append(suffix)
 
-            if best_match and best_distance <= max_distance:
+            if best_matches and best_distance <= max_distance:
+                # Prefer a common TLD if available
+                preferred = None
+                for tld in self.common_tlds:
+                    if tld in best_matches:
+                        preferred = tld
+                        break
+                best_match = preferred if preferred is not None else best_matches[0]
                 domain_fixed = '.'.join(parts[:-i] + [best_match])
                 if ext_candidate != best_match:
                     self.logger.info(f"Fixed extension typo: '{ext_candidate}' -> '{best_match}' in domain '{domain}'")

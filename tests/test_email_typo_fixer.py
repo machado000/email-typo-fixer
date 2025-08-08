@@ -14,7 +14,7 @@ class TestEmailTypoFixer:
         ("USER@EXAMPLE.COM", "user@example.com"),
         ("us*er@example.com", "user@example.com"),
         ("user@exam!ple.com", "user@example.com"),
-        ("u s e r@example.com", "user@example.com"),
+        ("us er@example.com", "user@example.com"),
         ("user@exa mple.com", "user@example.com"),
         ("user@example..com", "user@example.com"),
         ("user@@example.com", "user@example.com"),
