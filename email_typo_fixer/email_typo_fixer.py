@@ -53,8 +53,10 @@ class EmailTypoFixer:
             'gmial': 'gmail',
             'gnail': 'gmail',
             'gmaill': 'gmail',
+            'gmaul': 'gmail',
             'hotmal': 'hotmail',
             'hotmial': 'hotmail',
+            'hotmsil': 'hotmail',
             'homtail': 'hotmail',
             'hotmaill': 'hotmail',
             'outlok': 'outlook',
@@ -63,8 +65,9 @@ class EmailTypoFixer:
             'oul': 'uol',
             'uoll': 'uol',
             'uoo': 'uol',
-            'yaho': 'yahoo',
             'yahho': 'yahoo',
+            'yaho': 'yahoo',
+            'yahoo': 'yahoo',
         }
 
         self.common_tlds = common_tlds or [
@@ -148,7 +151,7 @@ class EmailTypoFixer:
                 best_match = preferred if preferred is not None else best_matches[0]
                 domain_fixed = '.'.join(parts[:-i] + [best_match])
                 if ext_candidate != best_match:
-                    self.logger.info(f"Fixed extension typo: '{ext_candidate}' -> '{best_match}' in domain '{domain}'")
+                    self.logger.debug(f"Fixed extension typo: '{ext_candidate}' -> '{best_match}' in domain '{domain}'")
                 return domain_fixed
 
         return domain
@@ -264,7 +267,7 @@ class EmailTypoFixer:
             pattern = r'\b' + re.escape(typo) + r'\b'
             new_domain_name = re.sub(pattern, correct, domain_name)
             if new_domain_name != domain_name:
-                self.logger.info(f"Fixed domain typo: '{domain_name}' -> '{new_domain_name}'")
+                self.logger.debug(f"Fixed domain typo: '{domain_name}' -> '{new_domain_name}'")
             domain_name = new_domain_name
 
         # Recombine
