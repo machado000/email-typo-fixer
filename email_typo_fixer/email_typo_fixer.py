@@ -74,6 +74,11 @@ class EmailTypoFixer:
             "com", "net", "org", "edu", "gov", "mil", "br",
             "com.br", "net.br", "org.br", "edu.br", "gov.br", "mil.br"
         ]
+        self.provider_domain_corrections = {
+            'gmail.com.br': 'gmail.com',
+            'uol.com': 'uol.com.br',
+            # add more as needed
+        }
 
     def _init_psl_and_suffixes(self) -> None:
         """
@@ -272,6 +277,12 @@ class EmailTypoFixer:
 
         # Recombine
         domain = f"{domain_name}.{extension}" if extension else domain_name
+
+        # Correct common provider domains (e.g., gmail.com.br -> gmail.com)
+
+        if domain in self.provider_domain_corrections:
+            domain = self.provider_domain_corrections[domain]
+
         fixed_email = f"{local}@{domain}"
 
         # Final validation
