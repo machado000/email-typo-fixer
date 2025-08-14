@@ -236,7 +236,7 @@ class EmailTypoFixer:
         if '.' not in domain:
             msg = f"Invalid email, missing '.' in domain: {email}"
             self.logger.warning(msg)
-            raise ValueError(msg)
+            domain = domain + '.com.br'  # Default to .com.br if no dot is present
 
         # Optionally skip TLD correction for .co domains if requested
         if domain.endswith('.co') and not fix_tld_co:
