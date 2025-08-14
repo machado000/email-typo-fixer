@@ -219,6 +219,10 @@ class EmailTypoFixer:
         # Replace consecutive '@' with a single '@'
         email = re.sub(r'@+', '@', email)
 
+        # Fix double '@gmail.com@gmail.com' typo
+        if '@gmail.com@gmail.com' in email:
+            email = email.replace('@gmail.com@gmail.com', '@gmail.com')
+
         # Check for @ and at least one . after @
         if '@' not in email or email.count('@') != 1:
             msg = f"Invalid email, missing or too many '@': {email}"
