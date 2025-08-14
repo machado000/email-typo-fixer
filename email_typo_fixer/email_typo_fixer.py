@@ -220,8 +220,7 @@ class EmailTypoFixer:
         email = re.sub(r'@+', '@', email)
 
         # Fix double '@gmail.com@gmail.com' typo
-        if '@gmail.com@gmail.com' in email:
-            email = email.replace('@gmail.com@gmail.com', '@gmail.com')
+        email = email.replace('@gmail.com@gmail.com', '@gmail.com')
 
         # Check for @ and at least one . after @
         if '@' not in email or email.count('@') != 1:
@@ -238,8 +237,7 @@ class EmailTypoFixer:
 
         # Ensure at least one . in domain
         if '.' not in domain:
-            msg = f"Invalid email, missing '.' in domain: {email}"
-            self.logger.warning(msg)
+            self.logger.warning(f"Invalid email, missing '.' in domain: {email}; defaulting to '.com.br'")
             domain = domain + '.com.br'  # Default to .com.br if no dot is present
 
         # Optionally skip TLD correction for .co domains if requested
