@@ -190,9 +190,11 @@ class EmailTypoFixer:
 
         Returns:
             The normalized and corrected email address.
+            The original email if it cannot be fixed.
 
         Raises:
-            ValueError: If the email cannot be normalized or is invalid.
+            ValueError: If the email is not a string.
+            ValueError: If the PublicSuffixList cannot be initialized or parsed.
         """
 
         if not isinstance(email, str):
@@ -226,14 +228,14 @@ class EmailTypoFixer:
         if '@' not in email or email.count('@') != 1:
             msg = f"Invalid email, missing or too many '@': {email}"
             self.logger.warning(msg)
-            raise ValueError(msg)
+            return email  # Return the original email if it cannot be fixed
 
         # Extract local, domain, extension, and country parts
         local, domain = email.split('@', 1)
         if not local or not domain:
             msg = f"Invalid email, missing local or domain part: {email}"
             self.logger.warning(msg)
-            raise ValueError(msg)
+            return email  # Return the original email if it cannot be fixed
 
         # Ensure at least one . in domain
         if '.' not in domain:
@@ -292,7 +294,7 @@ class EmailTypoFixer:
         if not re.match(email_regex, fixed_email):
             msg = f"Invalid email after fix: {fixed_email}"
             self.logger.warning(msg)
-            raise ValueError(msg)
+            return email  # Return the original email if it cannot be fixed
 
         return fixed_email
 
