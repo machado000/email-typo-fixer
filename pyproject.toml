@@ -1,6 +1,6 @@
 [project]
 name = "email-typo-fixer"
-version = "1.1.0"
+version = "1.1.1"
 description = "A Python library to automatically detect and fix common typos in email addresses"
 authors = [
     { name = "Joao Brito" }
