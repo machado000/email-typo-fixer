@@ -227,19 +227,19 @@ class EmailTypoFixer:
         # Check for @ and at least one . after @
         if '@' not in email or email.count('@') != 1:
             msg = f"Invalid email, missing or too many '@': {email}"
-            self.logger.warning(msg)
+            self.logger.debug(msg)
             return email  # Return the original email if it cannot be fixed
 
         # Extract local, domain, extension, and country parts
         local, domain = email.split('@', 1)
         if not local or not domain:
             msg = f"Invalid email, missing local or domain part: {email}"
-            self.logger.warning(msg)
+            self.logger.debug(msg)
             return email  # Return the original email if it cannot be fixed
 
         # Ensure at least one . in domain
         if '.' not in domain:
-            self.logger.warning(f"Invalid email, missing '.' in domain: {email}; defaulting to '.com.br'")
+            self.logger.debug(f"Invalid email, missing '.' in domain: {email}; defaulting to '.com.br'")
             domain = domain + '.com.br'  # Default to .com.br if no dot is present
 
         # Optionally skip TLD correction for .co domains if requested
@@ -293,7 +293,7 @@ class EmailTypoFixer:
         email_regex = r'^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$'
         if not re.match(email_regex, fixed_email):
             msg = f"Invalid email after fix: {fixed_email}"
-            self.logger.warning(msg)
+            self.logger.debug(msg)
             return email  # Return the original email if it cannot be fixed
 
         return fixed_email
