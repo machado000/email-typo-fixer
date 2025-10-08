@@ -1,13 +1,13 @@
 [project]
 name = "email-typo-fixer"
-version = "1.1.1"
+version = "1.1.3"
 description = "A Python library to automatically detect and fix common typos in email addresses"
 authors = [
     { name = "Joao Brito" }
 ]
 license = { text = "MIT" }
 readme = "README.md"
-requires-python = ">=3.10,<4.0"
+requires-python = ">=3.11,<3.15"
 keywords = ["email", "typo", "correction", "validation", "normalization"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -15,9 +15,10 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Communications :: Email",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Text Processing",
@@ -46,7 +47,7 @@ flake8 = ">=5.0.0,<6.0.0"
 mypy = ">=1.0.0,<2.0.0"
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true

@@ -215,7 +215,7 @@ except ValueError as e:
 
 ## Requirements
 
-- Python 3.10+
+- Python 3.11+
 - RapidFuzz  >= 3.13.0
 - publicsuffixlist >= 1.0.2
 
